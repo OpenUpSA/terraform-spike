@@ -11,6 +11,12 @@ provider "netlify" {
 resource "netlify_site" "affidavit-evictions-org" {
   name = "affidavit-evictions-org"
 
+  # Domain record configured manually at: https://www.domains.co.za/index.php?m=proddomains&area=domains&manage=130503&action=dnsRecords
+  #
+  # CNAME affidavit -> affidavit-evictions-org.netlify.com
+  #
+  custom_domain = "affidavit.evictions.org.za"
+
   repo {
     provider    = "github"
     repo_path   = "OpenUpSA/eviction-resources"
