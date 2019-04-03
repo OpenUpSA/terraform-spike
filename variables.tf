@@ -24,6 +24,10 @@ variable "docker_password" {
   description = "Docker password for image uploads"
 }
 
+variable "netlify_token" {
+  description = "https://app.netlify.com/user/applications#personal-access-tokens"
+}
+
 # Configuration:
 
 variable "digitalocean_region" {
