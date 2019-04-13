@@ -12,27 +12,28 @@ resource "cloudflare_zone" "khetha_org_za" {
   plan = "free"
 }
 
-resource "cloudflare_record" "A_khetha_org_za" {
-  domain = "${cloudflare_zone.khetha_org_za.zone}"
-  type   = "A"
-  name   = "khetha.org.za"
-
-  # Netlify's load balancer IP address: https://www.netlify.com/docs/custom-domains/
-  value = "104.198.14.52"
-
-  proxied = "true"
-}
-
-resource "cloudflare_record" "CNAME_www_khetha_org_za" {
-  domain = "${cloudflare_zone.khetha_org_za.zone}"
-  type   = "CNAME"
-  name   = "www.khetha.org.za"
-  value  = "khetha.netlify.com"
-
-  proxied = "true"
-}
+#resource "cloudflare_record" "A_khetha_org_za" {
+#  domain = "${cloudflare_zone.khetha_org_za.zone}"
+#  type   = "A"
+#  name   = "khetha.org.za"
+#
+#  # Netlify's load balancer IP address: https://www.netlify.com/docs/custom-domains/
+#  value = "104.198.14.52"
+#
+#  proxied = "true"
+#}
+#
+#resource "cloudflare_record" "CNAME_www_khetha_org_za" {
+#  domain = "${cloudflare_zone.khetha_org_za.zone}"
+#  type   = "CNAME"
+#  name   = "www.khetha.org.za"
+#  value  = "khetha.netlify.com"
+#
+#  proxied = "true"
+#}
 
 # Settings:
+# https://www.terraform.io/docs/providers/cloudflare/r/zone_settings_override.html
 
 resource "cloudflare_zone_settings_override" "khetha_org_za" {
   name = "${cloudflare_zone.khetha_org_za.zone}"
@@ -94,24 +95,43 @@ resource "cloudflare_zone_settings_override" "khetha_org_za" {
     server_side_exclude         = "on"
     sha1_support                = "off"
     sort_query_string_for_cache = "off"
-    ssl                         = "full"
-    tls_1_2_only                = "off"
-    tls_1_3                     = "on"
-    tls_client_auth             = "off"
-    true_client_ip_header       = "off"
-    waf                         = "off"
-    websockets                  = "on"
+
+    # XXX: Switch to flexible, for now.
+    ssl = "flexible"
+
+    tls_1_2_only          = "off"
+    tls_1_3               = "on"
+    tls_client_auth       = "off"
+    true_client_ip_header = "off"
+    waf                   = "off"
+    websockets            = "on"
   }
 }
 
 # New resources since the import:
 
 resource "cloudflare_record" "A_staging_khetha_org_za" {
-  domain = "${cloudflare_zone.khetha_org_za.zone}"
-  type   = "A"
-  name   = "staging.khetha.org.za"
-  value  = "${digitalocean_floating_ip.khetha-ip.ip_address}"
+  domain  = "${cloudflare_zone.khetha_org_za.zone}"
+  type    = "A"
+  name    = "staging.khetha.org.za"
+  value   = "${digitalocean_floating_ip.khetha-ip.ip_address}"
+  proxied = true
+}
 
-  # XXX: Doesn't seem to be working yet?
-  proxied = false
+# Point production at staging, for now.
+
+resource "cloudflare_record" "A_khetha_org_za" {
+  domain  = "${cloudflare_zone.khetha_org_za.zone}"
+  type    = "A"
+  name    = "khetha.org.za"
+  value   = "${digitalocean_floating_ip.khetha-ip.ip_address}"
+  proxied = true
+}
+
+resource "cloudflare_record" "A_www_khetha_org_za" {
+  domain  = "${cloudflare_zone.khetha_org_za.zone}"
+  type    = "A"
+  name    = "www.khetha.org.za"
+  value   = "${digitalocean_floating_ip.khetha-ip.ip_address}"
+  proxied = true
 }
